@@ -10,8 +10,8 @@ export DEBIAN_FRONTEND=noninteractive
 echo "set hostname"
 ./set-hostname.bash
 
-echo "remove unattended-upgrades"
-./apt-config.bash
+# echo "remove unattended-upgrades"
+# ./apt-config.bash
 
 echo "get latest upgrades"
 ./apt-upgrade.bash
