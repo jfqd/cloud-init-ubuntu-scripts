@@ -22,7 +22,8 @@ if /usr/sbin/mdata-get mail_smarthost 1>/dev/null 2>&1; then
     /etc/exim4/update-exim4.conf.conf
 fi
 
-sed -i "s:dc_other_hostnames='localhost':dc_other_hostnames='$(/bin/echo -n `/bin/hostname -f`)':" \
+HOSTNAME=$(/bin/echo -n `/bin/hostname -f`)
+sed -i "s:dc_other_hostnames='localhost':dc_other_hostnames='${HOSTNAME}':" \
   /etc/exim4/update-exim4.conf.conf
 
 hostname > /etc/mailname
