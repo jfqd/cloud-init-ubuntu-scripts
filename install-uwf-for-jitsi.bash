@@ -2,6 +2,8 @@
 
 apt -y -qq install ufw
 
+ufw deny incoming
+ufw allow outgoing
 ufw allow in ssh
 ufw allow in http
 ufw allow in https
