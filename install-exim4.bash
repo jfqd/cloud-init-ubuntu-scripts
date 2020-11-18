@@ -15,10 +15,13 @@ if /usr/sbin/mdata-get mail_smarthost 1>/dev/null 2>&1; then
   echo "$(/usr/sbin/mdata-get mail_smarthost):$AUTH" > /etc/exim4/passwd.client
   chmod 0640 /etc/exim4/passwd.client
   
-  sed -i "s:dc_eximconfig_configtype='local':dc_eximconfig_configtype='satellite':" \
+  sed -i "s:dc_eximconfig_configtype='local':dc_eximconfig_configtype='smarthost':" \
+    /etc/exim4/update-exim4.conf.conf
+  
+  sed -i "s|dc_local_interfaces='127.0.0.1 ; ::1'|dc_local_interfaces='127.0.0.1'|" \
     /etc/exim4/update-exim4.conf.conf
 
-  sed -i "s:dc_smarthost='':dc_smarthost='$(/usr/sbin/mdata-get mail_smarthost)':" \
+  sed -i "s|dc_smarthost=''|dc_smarthost='$(/usr/sbin/mdata-get mail_smarthost)'::587|" \
     /etc/exim4/update-exim4.conf.conf
 fi
 
@@ -31,4 +34,7 @@ sed -i "s:dc_other_hostnames='localhost':dc_other_hostnames='${HOSTNAME}':" \
 hostname > /etc/mailname
 
 update-exim4.conf
-service exim4 restart
+
+service exim4 stop
+pkill exim4 || true
+service exim4 start
