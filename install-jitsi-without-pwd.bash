@@ -13,6 +13,25 @@ echo "jitsi-videobridge jitsi-videobridge/jvb-hostname string ${HOSTNAME}" | deb
 echo "jitsi-meet-web-config jitsi-meet/cert-choice select 'Generate a new self-signed certificate (You will later get a chance to obtain a Let's encrypt certificate)'" | debconf-set-selections
 apt-get --option=Dpkg::Options::=--force-confold --option=Dpkg::options::=--force-unsafe-io --assume-yes --quiet install jitsi-meet
 
-# report@qutic.com
 sed -i 's|read EMAIL|EMAIL=$(/usr/sbin/mdata-get mail_adminaddr)|' /usr/share/jitsi-meet/scripts/install-letsencrypt-cert.sh
 /usr/share/jitsi-meet/scripts/install-letsencrypt-cert.sh
+
+# special config
+sed -i \
+    -e "s#// requireDisplayName: true,#requireDisplayName: true,#" \
+    -e "s#enableWelcomePage: true,#enableWelcomePage: false,#" \
+    -e "s#// doNotStoreRoom: true,#doNotStoreRoom: true,#" \
+    -e "s#// defaultLanguage: 'en',#defaultLanguage: 'de',#" \
+    -e "#// prejoinPageEnabled: false,#prejoinPageEnabled: true,#" \
+    -e "#// disableThirdPartyRequests: false,#disableThirdPartyRequests: true,#" \
+    -e "#// enableLayerSuspension: false,#enableLayerSuspension: true,#" \
+    -e "#// disableAudioLevels: false,#disableAudioLevels: true,#" \
+    /etc/jitsi/meet/${HOSTNAME}-config.js
+
+# TODO: activate monitoring
+
+# restart services
+service jicofo restart
+service jitsi-videobridge2 restart
+service prosody restart
+service nginx restart
