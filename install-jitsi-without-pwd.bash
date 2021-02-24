@@ -28,7 +28,36 @@ sed -i \
     -e "#// disableAudioLevels: false,#disableAudioLevels: true,#" \
     /etc/jitsi/meet/${HOSTNAME}-config.js
 
-# TODO: activate monitoring
+# activate private rest endpoint
+sed -i -e "s|JVB_OPTS=\"--apis=.\"|JVB_OPTS=\"--apis=rest\"|" /etc/jitsi/videobridge/config
+
+rm /etc/jitsi/videobridge/jvb.conf
+cat /etc/jitsi/videobridge/jvb.conf << EOF
+videobridge {
+    http-servers {
+        public {
+            port = 9090
+        }
+        private {
+            port = 8080
+            tls-port = -1
+            host = localhost
+        }
+    }
+    websockets {
+        enabled = true
+        domain = "jitsi.example.com:443"
+        tls = true
+    }
+}
+EOF
+sed -i -e "s/jitsi.example.com/${HOSTNAME}/" /etc/jitsi/videobridge/jvb.conf
+
+# zabbix monitoring
+cat >> /etc/zabbix/zabbix_agentd.d/local.conf << EOF
+UserParameter=jitsi.stats,curl -s "http://localhost:8080/colibri/stats"
+EOF
+systemctl restart zabbix-agent
 
 # restart services
 service jicofo restart
