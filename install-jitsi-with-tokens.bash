@@ -55,7 +55,7 @@ echo "org.jitsi.jicofo.auth.URL=XMPP:${HOSTNAME}" >> /etc/jitsi/jicofo/sip-commu
 sed -i -e "s|JVB_OPTS=\"--apis=.\"|JVB_OPTS=\"--apis=rest\"|" /etc/jitsi/videobridge/config
 
 rm /etc/jitsi/videobridge/jvb.conf
-cat /etc/jitsi/videobridge/jvb.conf << EOF
+cat >> /etc/jitsi/videobridge/jvb.conf << EOF
 videobridge {
     http-servers {
         public {

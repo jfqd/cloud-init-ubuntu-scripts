@@ -25,7 +25,7 @@ echo "Include \"conf.d/*.cfg.lua\"" >> /etc/prosody/prosody.cfg.lua
 sed -i 's|read EMAIL|EMAIL=$(/usr/sbin/mdata-get mail_adminaddr)|' /usr/share/jitsi-meet/scripts/install-letsencrypt-cert.sh
 /usr/share/jitsi-meet/scripts/install-letsencrypt-cert.sh
 
-cp /etc/prosody/conf.avail/jm-${HOSTNAME}.cfg.lua /etc/prosody/conf.avail/jm-${HOSTNAME}.cfg.lua.orig
+cp /etc/prosody/conf.avail/${HOSTNAME}.cfg.lua /etc/prosody/conf.avail/${HOSTNAME}.cfg.lua.orig
 
 sed -i -e "s#authentication = \"anonymous\"#authentication = \"internal_plain\"#" /etc/prosody/conf.avail/${HOSTNAME}.cfg.lua
 
@@ -56,7 +56,7 @@ sed -i \
 sed -i -e "s|JVB_OPTS=\"--apis=.\"|JVB_OPTS=\"--apis=rest\"|" /etc/jitsi/videobridge/config
 
 rm /etc/jitsi/videobridge/jvb.conf
-cat /etc/jitsi/videobridge/jvb.conf << EOF
+cat >> /etc/jitsi/videobridge/jvb.conf << EOF
 videobridge {
     http-servers {
         public {
