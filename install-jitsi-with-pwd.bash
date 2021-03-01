@@ -82,6 +82,19 @@ UserParameter=jitsi.stats,curl -s "http://localhost:8080/colibri/stats"
 EOF
 systemctl restart zabbix-agent
 
+cat >> /usr/local/bin/register << 'EOF'
+#!/bin/bash
+
+prosodyctl register $1 $(hostname) $2
+EOF
+chmod +x /usr/local/bin/register
+
+PROSODY_USR=$(/usr/sbin/mdata-get prosody_usr)
+PROSODY_PWD=$(/usr/sbin/mdata-get prosody_pwd)
+if [[ "${PROSODY_USR}" && "${PROSODY_PWD}" ]]; then
+  /usr/local/bin/register "${PROSODY_USR}" "${PROSODY_PWD}"
+fi
+
 # restart services
 systemctl restart prosody
 systemctl restart jicofo
