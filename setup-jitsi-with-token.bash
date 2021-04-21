@@ -8,7 +8,7 @@ cd $(dirname $(readlink -f $0))
 ./deactivate-ipv6.bash
 ./install-uwf-for-jitsi.bash
 ./configure-uwf-for-zabbix.bash
-./install-jitsi-with-pwd.bash
+./install-jitsi-with-tokens.bash
 ./install-nginx.bash
 
 )
