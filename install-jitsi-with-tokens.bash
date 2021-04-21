@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# https://szewong.medium.com/rocket-chat-part-3-installing-jitsi-with-jwt-for-secure-video-conferencing-b6f909e7f92c
+# https://community.jitsi.org/t/solved-issue-in-connectivity-after-upgrade-the-jitsi-meet/17882/6
+
 HOSTNAME=$(/usr/sbin/mdata-get sdc:hostname)
 EMAIL=$(/usr/sbin/mdata-get mail_adminaddr)
 APP_ID=$(echo "${HOSTNAME}" | cut -d"." -f1)
@@ -29,12 +32,13 @@ sed -i "s|read EMAIL|EMAIL=${EMAIL}|" /usr/share/jitsi-meet/scripts/install-lets
 # TODO: set APP_ID and APP_SECRET to debconf
 echo "jitsi-meet-tokens jitsi-meet-tokens/appid string ${APP_ID}" | debconf-set-selections
 echo "jitsi-meet-tokens jitsi-meet-tokens/appsecret string ${APP_SECRET}" | debconf-set-selections
-
-apt-get -y install luarocks libssl1.0-dev liblua5.2-dev
+apt-get -y install luarocks libssl1.0-dev liblua5.2-dev liblua5.1-0-dev
 luarocks install luacrypto
 apt-get --option=Dpkg::Options::=--force-confold --option=Dpkg::options::=--force-unsafe-io --assume-yes --quiet install jitsi-meet-tokens
 apt-get -y purge jitsi-meet-tokens
 # strange, but the second time it installs more packages...
+echo "jitsi-meet-tokens jitsi-meet-tokens/appid string ${APP_ID}" | debconf-set-selections
+echo "jitsi-meet-tokens jitsi-meet-tokens/appsecret string ${APP_SECRET}" | debconf-set-selections
 apt-get --option=Dpkg::Options::=--force-confold --option=Dpkg::options::=--force-unsafe-io --assume-yes --quiet install jitsi-meet-tokens
 luarocks remove --force lua-cjson
 luarocks install lua-cjson 2.0.0-1
@@ -46,6 +50,8 @@ VirtualHost "guest.${HOSTNAME}"
     authentication = "anonymous"
     c2s_require_encryption = false
 EOF
+
+sed -i "s#storage = \"none\"#storage = \"null\"" /etc/prosody/conf.avail/${HOSTNAME}.cfg.lua
 
 sed -i "s#// anonymousdomain: 'guest.example.com',#anonymousdomain: 'guest.${HOSTNAME}',#" /etc/jitsi/meet/${HOSTNAME}-config.js
 
@@ -69,12 +75,11 @@ videobridge {
     }
     websockets {
         enabled = true
-        domain = "jitsi.example.com:443"
+        domain = "${HOSTNAME}:443"
         tls = true
     }
 }
 EOF
-sed -i -e "s/jitsi.example.com/${HOSTNAME}/" /etc/jitsi/videobridge/jvb.conf
 
 # zabbix monitoring
 cat >> /etc/zabbix/zabbix_agentd.d/local.conf << EOF
@@ -83,7 +88,17 @@ EOF
 systemctl restart zabbix-agent
 
 # restart services
-service jicofo restart
-service jitsi-videobridge2 restart
-service prosody restart
-service nginx restart
+systemctl restart jicofo
+systemctl restart jitsi-videobridge2
+systemctl restart prosody
+systemctl restart nginx
+
+# systemctl status jicofo
+# systemctl status jitsi-videobridge2
+# systemctl status prosody
+# systemctl status nginx
+
+# tail -f /var/log/prosody/prosody.log
+
+# Get a jwt from: jwt.io
+# https://${HOSTNAME}/Test42?jwt=longJWT
