@@ -8,9 +8,6 @@ EMAIL=$(/usr/sbin/mdata-get mail_adminaddr)
 APP_ID=$(echo "${HOSTNAME}" | cut -d"." -f1)
 APP_SECRET=$(hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/urandom)
 
-echo "APP_ID:     ${APP_ID}"
-echo "APP_SECRET: ${APP_SECRET}"
-
 sed -i "s/#DefaultLimitNOFILE=/DefaultLimitNOFILE=65000/" /etc/systemd/system.conf
 sed -i "s/#DefaultLimitNPROC=/DefaultLimitNPROC=65000/" /etc/systemd/system.conf
 sed -i "s/#DefaultTasksMax=/DefaultTasksMax=65000/" /etc/systemd/system.conf
@@ -34,7 +31,7 @@ sed -i "s|read EMAIL|EMAIL=${EMAIL}|" /usr/share/jitsi-meet/scripts/install-lets
 
 echo "jitsi-meet-tokens jitsi-meet-tokens/appid string ${APP_ID}" | debconf-set-selections
 echo "jitsi-meet-tokens jitsi-meet-tokens/appsecret string ${APP_SECRET}" | debconf-set-selections
-apt-get -y install gcc unzip lua5.2 liblua5.2 liblua5.2-dev luarocks libssl1.0-dev
+apt-get -y install gcc unzip libsasl2-dev lua5.2 liblua5.2 liblua5.2-dev luarocks libssl1.0-dev
 
 # install lua libs
 luarocks install luacrypto
@@ -119,6 +116,15 @@ apt-get -y autoremove
 
 # restart services
 systemctl restart prosody jicofo jitsi-videobridge2 nginx
+
+cat >> /etc/jitsi/jwt_payload << EOF
+{
+  "aud": "jitsi",
+  "iss": "${APP_ID}",
+  "sub": "${APP_SECRET}",
+  "room": "*"
+}
+EOF
 
 # tail -f /var/log/prosody/prosody.log
 
