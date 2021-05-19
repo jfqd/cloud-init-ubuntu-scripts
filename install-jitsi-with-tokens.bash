@@ -6,7 +6,12 @@
 HOSTNAME=$(/usr/sbin/mdata-get sdc:hostname)
 EMAIL=$(/usr/sbin/mdata-get mail_adminaddr)
 APP_ID=$(echo "${HOSTNAME}" | cut -d"." -f1)
-APP_SECRET=$(hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/urandom)
+
+if /usr/sbin/mdata-get jitsi_app_secret 1>/dev/null 2>&1; then
+  APP_SECRET=$(/usr/sbin/mdata-get jitsi_app_secret)
+else
+  APP_SECRET=$(hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/urandom)
+fi
 
 sed -i "s/#DefaultLimitNOFILE=/DefaultLimitNOFILE=65000/" /etc/systemd/system.conf
 sed -i "s/#DefaultLimitNPROC=/DefaultLimitNPROC=65000/" /etc/systemd/system.conf
