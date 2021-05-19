@@ -35,6 +35,5 @@ hostname > /etc/mailname
 
 update-exim4.conf
 
-service exim4 stop
-pkill exim4 || true
-service exim4 start
+systemctl stop exim4
+systemctl start exim4
