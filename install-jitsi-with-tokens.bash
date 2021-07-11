@@ -132,6 +132,7 @@ cat >> /etc/jitsi/jwt_payload << EOF
 EOF
 
 cat >> /usr/local/bin/app-restart << EOF
+#!/bin/bash
 systemctl restart jicofo
 systemctl restart jitsi-videobridge2
 systemctl restart prosody
