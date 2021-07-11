@@ -131,6 +131,14 @@ cat >> /etc/jitsi/jwt_payload << EOF
 }
 EOF
 
+cat >> /usr/local/bin/app-restart << EOF
+systemctl restart jicofo
+systemctl restart jitsi-videobridge2
+systemctl restart prosody
+systemctl restart nginx
+EOF
+chmod +x /usr/local/bin/app-restart
+
 # tail -f /var/log/prosody/prosody.log
 
 # Get a jwt from: jwt.io
