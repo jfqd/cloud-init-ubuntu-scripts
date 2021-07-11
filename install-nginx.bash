@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt -y -qq install nginx
+apt-get -y -qq install nginx
 
 cat  >> /etc/nginx/conf.d/status.conf << EOF
 server {

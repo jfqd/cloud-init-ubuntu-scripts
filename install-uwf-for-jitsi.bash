@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt -y -qq install ufw
+apt-get -y -qq install ufw
 
 ufw deny incoming
 ufw allow outgoing

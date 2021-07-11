@@ -8,9 +8,9 @@ yes no | apt-get -y -qq upgrade
 cat >> /usr/local/bin/uptodate << EOF
 #!/bin/bash
 
-/usr/bin/apt update
-/usr/bin/apt -y upgrade
-/usr/bin/apt -y autoremove
+/usr/bin/apt-get update
+/usr/bin/apt-get -y upgrade
+/usr/bin/apt-get -y autoremove
 
 EOF
 chmod +x /usr/local/bin/uptodate

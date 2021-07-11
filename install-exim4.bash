@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt -y -qq install exim4 apt-transport-https
+apt-get -y -qq install exim4 apt-transport-https
 
 if /usr/sbin/mdata-get mail_smarthost 1>/dev/null 2>&1; then
   if /usr/sbin/mdata-get mail_adminaddr 1>/dev/null 2>&1; then
