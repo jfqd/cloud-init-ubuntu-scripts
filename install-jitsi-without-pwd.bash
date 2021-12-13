@@ -4,9 +4,14 @@ sed -i "s/#DefaultLimitNOFILE=/DefaultLimitNOFILE=65000/" /etc/systemd/system.co
 sed -i "s/#DefaultLimitNPROC=/DefaultLimitNPROC=65000/" /etc/systemd/system.conf
 sed -i "s/#DefaultTasksMax=/DefaultTasksMax=65000/" /etc/systemd/system.conf
 
+echo deb http://packages.prosody.im/debian $(lsb_release -sc) main | tee -a /etc/apt/sources.list
+wget https://prosody.im/files/prosody-debian-packages.key -O- | apt-key add -
+apt-get update
+apt-get -y -qq install prosody
+
 curl -Ls https://download.jitsi.org/jitsi-key.gpg.key | apt-key add -
 echo 'deb https://download.jitsi.org stable/' > /etc/apt/sources.list.d/jitsi-stable.list
-apt-get -y update
+apt-get update
 
 # https://github.com/jitsi/jitsi-meet/issues/5759
 echo "jitsi-videobridge jitsi-videobridge/jvb-hostname string ${HOSTNAME}" | debconf-set-selections
