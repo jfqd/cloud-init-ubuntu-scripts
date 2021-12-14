@@ -53,8 +53,15 @@ sed -i \
     /etc/jitsi/meet/${HOSTNAME}-config.js
 
 # activate private rest endpoint
-sed -i -e "s|JVB_OPTS=\"--apis=.\"|JVB_OPTS=\"--apis=rest\"|" /etc/jitsi/videobridge/config
+if [[ $(grep JVB_OPTS /etc/jitsi/videobridge/config | wc -l) -gt 0 ]]; then
+  sed -i -e "s|JVB_OPTS=\"--apis=.\"|JVB_OPTS=\"--apis=rest\"|" /etc/jitsi/videobridge/config
+else
+  cat >> /etc/jitsi/videobridge/config << EOF
 
+JVB_OPTS="--apis=rest"  
+EOF
+fi
+  
 rm /etc/jitsi/videobridge/jvb.conf
 cat >> /etc/jitsi/videobridge/jvb.conf << EOF
 videobridge {

@@ -81,7 +81,15 @@ sed -i "s#// anonymousdomain: 'guest.example.com',#anonymousdomain: 'guest.${HOS
 echo "org.jitsi.jicofo.auth.URL=XMPP:${HOSTNAME}" >> /etc/jitsi/jicofo/sip-communicator.properties
 
 # activate private rest endpoint
-sed -i -e "s|JVB_OPTS=\"--apis=.\"|JVB_OPTS=\"--apis=rest\"|" /etc/jitsi/videobridge/config
+# activate private rest endpoint
+if [[ $(grep JVB_OPTS /etc/jitsi/videobridge/config | wc -l) -gt 0 ]]; then
+  sed -i -e "s|JVB_OPTS=\"--apis=.\"|JVB_OPTS=\"--apis=rest\"|" /etc/jitsi/videobridge/config
+else
+  cat >> /etc/jitsi/videobridge/config << EOF
+
+JVB_OPTS="--apis=rest"  
+EOF
+fi
 
 cat >> /etc/prosody/prosody.cfg.lua << EOF
 
