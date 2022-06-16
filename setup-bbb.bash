@@ -1,5 +1,12 @@
 #!/bin/bash
 
+(
+
+path=$(realpath $0)
+
+echo "*** Switch to folder: $path"
+cd "$(dirname "$path")"
+
 echo "*** Run base install"
 ./base-install.bash
 
@@ -14,5 +21,7 @@ echo "*** Allow zabbix"
 
 echo "*** Increase disk size"
 ./increase-disk.bash
+
+)
 
 # should reboot
