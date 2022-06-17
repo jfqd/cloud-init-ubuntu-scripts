@@ -83,6 +83,7 @@ echo "*** Configure bbb monitoring"
   chmod 400 /etc/bbbstats/config.json
   chmod 500 /etc/bbbstats/
   rm -rf /root/bbbstats
+  systemctl restart zabbix-agent
 )
 
 echo "*** Configure ssh ufw"
