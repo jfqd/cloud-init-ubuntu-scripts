@@ -45,21 +45,57 @@ if [[ $(dpkg -l | grep -c bbb-html5) -gt 0 ]]; then
   bbb-conf --check
   bbb-conf --status
   
+  echo "*** Configure greenlight"
   (
     cd /root/greenlight
     NAME=$(/usr/sbin/mdata-get bbb_admin_name)
     EMAIL2=$(/usr/sbin/mdata-get bbb_admin_email)
     PWD=$(/usr/sbin/mdata-get bbb_admin_pwd)
     docker exec greenlight-v2 bundle exec rake user:create["${NAME}","${EMAIL2}","${PWD}","admin"]
+    
+    docker-compose pull
+    docker-compose down
+    docker-compose up -d
   )
 fi
 
-if [[ -x /usr/local/bin/uptodate ]]; then
-  cat >> /usr/local/bin/uptodate << EOF
-# update the two docker images
+cat > /usr/local/bin/uptodate << EOF
+#!/bin/bash
+
+if [[ $EUID -ne 0 ]]; then
+  SUDO="sudo -E"
+else
+  SUDO=""
+fi
+
+export DEBIAN_FRONTEND=noninteractive
+$SUDO /usr/bin/apt-get update
+$SUDO /usr/bin/apt-get -y -o Dpkg::Options::="--force-confold" upgrade
+$SUDO /usr/bin/apt-get -y -o Dpkg::Options::="--force-confold" dist-upgrade
+$SUDO /usr/bin/apt-get -y autoremove
+
+# update the docker images
+$SUDO /usr/local/bin/uptodate-greenlight
+EOF
+chmod +x /usr/local/bin/uptodate
+
+cat > /usr/local/bin/uptodate-greenlight << EOF
+#!/bin/bash
+
+# update the docker images
 cd /root/greenlight
 docker-compose pull
 docker-compose down
 docker-compose up -d
 EOF
-fi
+chmod +x /usr/local/bin/uptodate-greenlight
+
+cat > /root/.bash_history << EOF
+vim /root/greenlight/.env
+docker-compose down; docker-compose up -d
+systemctl restart nginx
+/usr/local/bin/uptodate
+ufw status verbose
+tail -f /var/log/cloud-init*
+bbb-conf --status
+EOF
