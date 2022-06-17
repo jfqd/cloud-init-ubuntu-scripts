@@ -16,6 +16,9 @@ echo "*** Configure locale"
 echo "*** Increase disk size"
 ./increase-disk.bash
 
+echo "*** Install nginx"
+./install-nginx.bash
+
 echo "*** Install bbb"
 ./install-bbb.bash
 
