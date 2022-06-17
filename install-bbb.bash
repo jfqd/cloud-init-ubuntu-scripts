@@ -87,13 +87,12 @@ echo "*** Configure bbb monitoring"
 )
 
 echo "*** Configure ssh ufw"
-yes | ufw delete 2
-yes | ufw delete 7
-ufw allow from 91.229.246.24/32 to any port 22
-ufw allow from 91.229.246.25/32 to any port 22
+ufw delete allow OpenSSH
+ufw allow from 91.229.246.24/32 to any port 22 proto tcp
+ufw allow from 91.229.246.25/32 to any port 22 proto tcp
 
 echo "*** Configure scripts"
-cat > /usr/local/bin/uptodate << EOF
+cat > /usr/local/bin/uptodate << 'EOF'
 #!/bin/bash
 
 if [[ $EUID -ne 0 ]]; then
