@@ -57,8 +57,40 @@ if [[ $(dpkg -l | grep -c bbb-html5) -gt 0 ]]; then
     docker-compose down
     docker-compose up -d
   )
+else
+  echo "*** ERROR: BigBlueButton installation failed"
+  exit 1
 fi
 
+echo "*** Configure bbb monitoring"
+(
+  cd /root/
+  git clone https://github.com/jfqd/bbbstats.git
+  mkdir /etc/bbbstats
+  cp ./bbbstats/config.example.json /etc/bbbstats/config.json
+  cp ./bbbstats/bbbstats.py /usr/bin/bbbstats
+  cp ./bbbstats/bbbstats.conf /etc/zabbix/zabbix_agentd.d/bbstats.conf
+  URL=$(bbb-conf --secret | grep "URL: " | awk '{print $2}')
+  SECRET=$(bbb-conf --secret | grep "Secret: " | awk '{print $2}')
+  sed -i \
+      -e "s|https://bbb.example.com/bigbluebutton/api/|${URL}api/|" \
+      -e "s|your_api_secret|${SECRET}|" \   
+      /etc/bbbstats/config.json
+  chown zabbix /usr/bin/bbbstats
+  chmod u+x /usr/bin/bbbstats
+  chown -R zabbix /etc/bbbstats
+  chmod 400 /etc/bbbstats/config.json
+  chmod 500 /etc/bbbstats/
+  rm -rf /root/bbbstats
+)
+
+echo "*** Configure ssh ufw"
+yes | ufw delete 2
+yes | ufw delete 7
+ufw allow from 91.229.246.24/32 to any port 22
+ufw allow from 91.229.246.25/32 to any port 22
+
+echo "*** Configure scripts"
 cat > /usr/local/bin/uptodate << EOF
 #!/bin/bash
 
@@ -92,10 +124,11 @@ chmod +x /usr/local/bin/uptodate-greenlight
 
 cat > /root/.bash_history << EOF
 vim /root/greenlight/.env
-docker-compose down; docker-compose up -d
+cd /root/greenlight && docker-compose down && docker-compose up -d
 systemctl restart nginx
 /usr/local/bin/uptodate
 ufw status verbose
+ufw status numbered
 tail -f /var/log/cloud-init*
 bbb-conf --status
 EOF
