@@ -11,5 +11,5 @@ ufw allow in 3478
 ufw allow in 5349
 ufw allow in 10000:20000/udp
 ufw active
-yes | ufw enable
-yes | ufw enable
+yes | ufw --force enable
+yes | ufw --force enable
