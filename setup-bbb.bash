@@ -23,6 +23,3 @@ echo "*** Allow zabbix"
 ./configure-uwf-for-zabbix.bash
 
 )
-
-# echo "*** Stop sshd"
-# ./stop-sshd.bash
