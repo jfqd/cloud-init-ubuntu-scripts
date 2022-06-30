@@ -23,6 +23,54 @@ else
 fi
 
 if [[ $(dpkg -l | grep -c bbb-html5) -gt 0 ]]; then
+  
+  COTURN_SECRET=$(/usr/sbin/mdata-get coturn_secret)
+  COTURN_HOST=$(/usr/sbin/mdata-get coturn_host)
+  COTURN_PORT=$(/usr/sbin/mdata-get coturn_port)
+  
+  if [[ -n $COTURN_SECRET && -n $COTURN_HOST && -n $COTURN_PORT ]]; then
+    echo "*** Configure STUN- and TURN-server"
+    cp /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml \
+      /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml.bak
+  
+    cat > /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="stun0" class="org.bigbluebutton.web.services.turn.StunServer">
+        <constructor-arg index="0" value="stun:${COTURN_HOST}"/>
+    </bean>
+
+
+    <bean id="turn0" class="org.bigbluebutton.web.services.turn.TurnServer">
+        <constructor-arg index="0" value="${COTURN_SECRET}"/>
+        <constructor-arg index="1" value="turns:${COTURN_HOST}:${COTURN_PORT}?transport=tcp"/>
+        <constructor-arg index="2" value="86400"/>
+    </bean>
+
+    <bean id="stunTurnService"
+            class="org.bigbluebutton.web.services.turn.StunTurnService">
+        <property name="stunServers">
+            <set>
+                <ref bean="stun0"/>
+            </set>
+        </property>
+        <property name="turnServers">
+            <set>
+                <ref bean="turn0"/>
+            </set>
+        </property>
+    </bean>
+</beans>
+EOF
+  else
+    echo "*** No STUN- and TURN-server cause of missing configaration"
+  fi
+
+  echo "*** Configure greenlight"
   sed -i \
     -e "s|#   ALLOW_MAIL_NOTIFICATIONS=true|ALLOW_MAIL_NOTIFICATIONS=true|" \
     -e "s|SMTP_SERVER=|SMTP_SERVER=$(/usr/sbin/mdata-get mail_smarthost)|" \
@@ -46,7 +94,7 @@ if [[ $(dpkg -l | grep -c bbb-html5) -gt 0 ]]; then
   bbb-conf --check
   bbb-conf --status
   
-  echo "*** Configure greenlight"
+  echo "*** Create greenlight admin account"
   (
     cd /root/greenlight
     NAME=$(/usr/sbin/mdata-get bbb_admin_name)
@@ -128,6 +176,9 @@ vim /root/greenlight/.env
 cd /root/greenlight && docker-compose down && docker-compose up -d
 systemctl restart nginx
 /usr/local/bin/uptodate
+bbb-conf --check
+bbb-conf --status
+bbb-conf --restart
 ufw status verbose
 ufw status numbered
 tail -f /var/log/cloud-init*
