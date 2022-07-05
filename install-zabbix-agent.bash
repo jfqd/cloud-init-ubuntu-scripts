@@ -1,10 +1,22 @@
 #!/bin/bash
 
-wget https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3+bionic_all.deb
-dpkg -i zabbix-release_4.0-3+bionic_all.deb
-rm zabbix-release_4.0-3+bionic_all.deb
-apt-get -y update
-apt-get -y install zabbix-agent
+if [[ $(grep -c "18.04" /etc/lsb-release) -ge 1 ]]; then
+  echo "*** Install zabbix-agent on 18.04"
+  wget https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3+bionic_all.deb
+  dpkg -i zabbix-release_4.0-3+bionic_all.deb
+  rm zabbix-release_4.0-3+bionic_all.deb
+elif [[ $(grep -c "20.04" /etc/lsb-release) -ge 1 ]]; then
+  echo "*** Install zabbix-agent on 20.04"
+  wget https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3+focal_all.deb
+  dpkg -i zabbix-release_4.0-3+focal_all.deb
+  rm zabbix-release_4.0-3+focal_all.deb
+else
+  echo "*** ERROR: wrong ubuntu release, skip zabbix installation"
+  exit 1
+fi
+
+# apt-get -y update
+# apt-get -y install zabbix-agent
 mkdir -p /var/log/zabbix
 chown zabbix:zabbix /var/log/zabbix
 mkdir -p /etc/zabbix/zabbix_agentd.conf.d
