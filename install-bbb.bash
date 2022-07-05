@@ -123,8 +123,7 @@ echo "*** Configure bbb monitoring"
   SECRET=$(bbb-conf --secret | grep "Secret: " | awk '{print $2}')
   sed -i \
       -e "s|https://bbb.example.com/bigbluebutton/api/|${URL}api/|" \
-      -e "s|your_api_secret|${SECRET}|" \   
-      /etc/bbbstats/config.json
+      -e "s|your_api_secret|${SECRET}|" /etc/bbbstats/config.json
   chown zabbix /usr/bin/bbbstats
   chmod u+x /usr/bin/bbbstats
   chown -R zabbix /etc/bbbstats
@@ -172,6 +171,7 @@ EOF
 chmod +x /usr/local/bin/uptodate-greenlight
 
 cat > /root/.bash_history << EOF
+tail -f /var/log/syslog
 vim /root/greenlight/.env
 cd /root/greenlight && docker-compose down && docker-compose up -d
 systemctl restart nginx
