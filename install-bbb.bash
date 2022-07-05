@@ -16,7 +16,7 @@ if [[ $(grep -c "18.04" /etc/lsb-release) -ge 1 ]]; then
   wget -qO- https://ubuntu.bigbluebutton.org/bbb-install.sh | bash -s -- -w -v bionic-24 -s ${HOSTNAME} -e ${EMAIL} -g
 elif [[ $(grep -c "20.04" /etc/lsb-release) -ge 1 ]]; then
   echo "*** Install BBB 2.5 on 20.04"
-  wget -qO- https://ubuntu.bigbluebutton.org/bbb-install-2.5.sh | bash -s -- -w -v focal-25 -s ${HOSTNAME} -e ${EMAIL} -g
+  wget -qO- https://ubuntu.bigbluebutton.org/bbb-install-2.5.sh | bash -s -- -w -v focal-250 -s ${HOSTNAME} -e ${EMAIL} -g
 else
   echo "*** ERROR: wrong ubuntu release, skip installation"
   exit 1
