@@ -1,9 +1,10 @@
 #!/bin/bash
 
 path=$(realpath $0)
+folder=$(dirname "$path")
 
-echo "*** Switch to folder: $path"
-cd "$(dirname "$path")"
+echo "*** Switch to folder: ${folder}"
+cd "${folder}"
 
 export DEBIAN_FRONTEND=noninteractive
 

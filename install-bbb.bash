@@ -31,7 +31,7 @@ if [[ $(dpkg -l | grep -c bbb-html5) -gt 0 ]]; then
   if [[ -n $COTURN_SECRET && -n $COTURN_HOST && -n $COTURN_PORT ]]; then
     echo "*** Configure STUN- and TURN-server"
     cp /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml \
-      /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml.bak
+      /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml.orig
   
     cat > /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml << EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -66,6 +66,9 @@ if [[ $(dpkg -l | grep -c bbb-html5) -gt 0 ]]; then
     </bean>
 </beans>
 EOF
+  cp /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml \
+    /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml.bak
+  
   else
     echo "*** No STUN- and TURN-server cause of missing configaration"
   fi
@@ -86,6 +89,9 @@ EOF
     -e "s|DEFAULT_REGISTRATION=open|DEFAULT_REGISTRATION=invite|" \
     -e "s|ALLOW_GREENLIGHT_ACCOUNTS=true|ALLOW_GREENLIGHT_ACCOUNTS=true|" \
     /root/greenlight/.env
+  
+  # ensure hostname for recordings
+  bbb-conf --setip "${HOSTNAME}"
   
   bbb-conf --restart
   docker-compose down
@@ -138,6 +144,21 @@ ufw delete allow OpenSSH
 ufw allow from 91.229.246.24/32 to any port 22 proto tcp
 ufw allow from 91.229.246.25/32 to any port 22 proto tcp
 
+echo "*** Configure bbr"
+# https://wiki.crowncloud.net/?How_to_enable_BBR_on_Debian_10
+cat >> /etc/sysctl.conf << EOF
+net.core.default_qdisc=fq
+net.ipv4.tcp_congestion_control=bbr
+EOF
+sysctl -p
+
+echo "*** Get Meeting-Details"
+/usr/bin/apt-get -y install net-tools python3-pip
+pip3 install bigbluebutton_api_python
+pip3 install pyyaml
+curl -LO https://raw.githubusercontent.com/aau-zid/BigBlueButton-liveStreaming/master/examples/get_meetings.py
+chmod 0700 get_meetings.py
+
 echo "*** Configure scripts"
 cat > /usr/local/bin/uptodate << 'EOF'
 #!/bin/bash
@@ -154,8 +175,13 @@ $SUDO /usr/bin/apt-get -y -o Dpkg::Options::="--force-confold" upgrade
 $SUDO /usr/bin/apt-get -y -o Dpkg::Options::="--force-confold" dist-upgrade
 $SUDO /usr/bin/apt-get -y autoremove
 
+$SUDO /usr/bin/cp /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml.bak \
+  /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml
+
 # update the docker images
 $SUDO /usr/local/bin/uptodate-greenlight
+
+$SUDO /usr/bin/bbb-conf --restart
 EOF
 chmod +x /usr/local/bin/uptodate
 
@@ -181,6 +207,8 @@ bbb-conf --status
 bbb-conf --restart
 ufw status verbose
 ufw status numbered
+tail -f /var/log/ufw.log
+tail -f /var/log/syslog
 tail -f /var/log/cloud-init*
 bbb-conf --status
 EOF
