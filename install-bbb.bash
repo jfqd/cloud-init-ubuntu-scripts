@@ -85,6 +85,18 @@ EOF
       BBB_OICD_REDIRECT="${HOSTNAME}/b"
     fi
   fi
+  
+  if [[ -n "$(/usr/sbin/mdata-get bbb_allow_accounts 2>/dev/null)" ]]; then
+    ALLOW_GREENLIGHT_ACCOUNTS="$(/usr/sbin/mdata-get bbb_allow_accounts 2>/dev/null)"
+  else
+    ALLOW_GREENLIGHT_ACCOUNTS="true"
+  fi
+  
+  if [[ -n "$(/usr/sbin/mdata-get bbb_registration 2>/dev/null)" ]]; then
+    DEFAULT_REGISTRATION="$(/usr/sbin/mdata-get bbb_registration 2>/dev/null)"
+  else
+    DEFAULT_REGISTRATION="invite"
+  fi
 
   echo "*** Configure greenlight"
   sed -i \
@@ -99,8 +111,8 @@ EOF
     -e "s|SMTP_SENDER=|SMTP_SENDER=bbb@$(hostname | cut -d. -f2-3)|" \
     -e "s|SMTP_TEST_RECIPIENT=notifications@example.com|SMTP_TEST_RECIPIENT=$(/usr/sbin/mdata-get mail_adminaddr 2>/dev/null)|" \
     -e "s|HELP_URL=https://docs.bigbluebutton.org/greenlight/gl-overview.html|HELP_URL=https://qutic.com/de/kontakt/|" \
-    -e "s|DEFAULT_REGISTRATION=open|DEFAULT_REGISTRATION=invite|" \
-    -e "s|ALLOW_GREENLIGHT_ACCOUNTS=true|ALLOW_GREENLIGHT_ACCOUNTS=true|" \
+    -e "s|DEFAULT_REGISTRATION=open|DEFAULT_REGISTRATION=${DEFAULT_REGISTRATION}|" \
+    -e "s|ALLOW_GREENLIGHT_ACCOUNTS=true|ALLOW_GREENLIGHT_ACCOUNTS=${ALLOW_GREENLIGHT_ACCOUNTS}|" \
     -e "s|OPENID_CONNECT_CLIENT_ID=|OPENID_CONNECT_CLIENT_ID=${BBB_OICD_CLIENT_ID}|" \
     -e "s|OPENID_CONNECT_CLIENT_SECRET=|OPENID_CONNECT_CLIENT_SECRET=${BBB_OICD_CLIENT_SECRET}|" \
     -e "s|OPENID_CONNECT_ISSUER=|OPENID_CONNECT_ISSUER=${BBB_OICD_ISSUER}|" \
