@@ -8,8 +8,8 @@
 # -v  BBB-Version
 # -s  Hostname
 
-HOSTNAME="$(/usr/sbin/mdata-get sdc:hostname)"
-EMAIL="$(/usr/sbin/mdata-get mail_adminaddr)"
+HOSTNAME="$(/usr/sbin/mdata-get sdc:hostname 2>/dev/null)"
+EMAIL="$(/usr/sbin/mdata-get mail_adminaddr 2>/dev/null)"
 
 if [[ $(grep -c "18.04" /etc/lsb-release) -ge 1 ]]; then
   echo "*** Install BBB 2.4 on 18.04"
@@ -24,9 +24,9 @@ fi
 
 if [[ $(dpkg -l | grep -c bbb-html5) -gt 0 ]]; then
   
-  COTURN_SECRET=$(/usr/sbin/mdata-get coturn_secret)
-  COTURN_HOST=$(/usr/sbin/mdata-get coturn_host)
-  COTURN_PORT=$(/usr/sbin/mdata-get coturn_port)
+  COTURN_SECRET=$(/usr/sbin/mdata-get coturn_secret 2>/dev/null)
+  COTURN_HOST=$(/usr/sbin/mdata-get coturn_host 2>/dev/null)
+  COTURN_PORT=$(/usr/sbin/mdata-get coturn_port 2>/dev/null)
   
   if [[ -n $COTURN_SECRET && -n $COTURN_HOST && -n $COTURN_PORT ]]; then
     echo "*** Configure STUN- and TURN-server"
@@ -72,22 +72,39 @@ EOF
   else
     echo "*** No STUN- and TURN-server cause of missing configaration"
   fi
+  
+  # OIDC config
+  if [[ -n "$(/usr/sbin/mdata-get bbb_oicd_client_id 2>/dev/null)" ]]; then
+    echo "*** Get OIDC config"
+    BBB_OICD_CLIENT_ID=$(/usr/sbin/mdata-get bbb_oicd_client_id 2>/dev/null)
+    BBB_OICD_CLIENT_SECRET=$(/usr/sbin/mdata-get bbb_oicd_client_secret 2>/dev/null)
+    BBB_OICD_ISSUER=$(/usr/sbin/mdata-get bbb_oicd_issuer 2>/dev/null)
+    BBB_OICD_REDIRECT=$(/usr/sbin/mdata-get bbb_oicd_redirect 2>/dev/null)
+
+    if [[ -z "${BBB_OICD_REDIRECT}" ]]; then
+      BBB_OICD_REDIRECT="${HOSTNAME}/b"
+    fi
+  fi
 
   echo "*** Configure greenlight"
   sed -i \
     -e "s|#   ALLOW_MAIL_NOTIFICATIONS=true|ALLOW_MAIL_NOTIFICATIONS=true|" \
-    -e "s|SMTP_SERVER=|SMTP_SERVER=$(/usr/sbin/mdata-get mail_smarthost)|" \
+    -e "s|SMTP_SERVER=|SMTP_SERVER=$(/usr/sbin/mdata-get mail_smarthost 2>/dev/null)|" \
     -e "s|SMTP_PORT=|SMTP_PORT=465|" \
-    -e "s|SMTP_DOMAIN=|SMTP_DOMAIN=$(/usr/sbin/mdata-get mail_smarthost | cut -d. -f2-3)|" \
-    -e "s|SMTP_USERNAME=|SMTP_USERNAME=$(/usr/sbin/mdata-get mail_auth_user)|" \
-    -e "s|SMTP_PASSWORD=|SMTP_PASSWORD=$(/usr/sbin/mdata-get mail_auth_pass)|" \
+    -e "s|SMTP_DOMAIN=|SMTP_DOMAIN=$(/usr/sbin/mdata-get mail_smarthost 2>/dev/null | cut -d. -f2-3)|" \
+    -e "s|SMTP_USERNAME=|SMTP_USERNAME=$(/usr/sbin/mdata-get mail_auth_user 2>/dev/null)|" \
+    -e "s|SMTP_PASSWORD=|SMTP_PASSWORD=$(/usr/sbin/mdata-get mail_auth_pass 2>/dev/null)|" \
     -e "s|SMTP_AUTH=|SMTP_AUTH=plain|" \
     -e "s|SMTP_STARTTLS_AUTO=|SMTP_TLS=true|" \
     -e "s|SMTP_SENDER=|SMTP_SENDER=bbb@$(hostname | cut -d. -f2-3)|" \
-    -e "s|SMTP_TEST_RECIPIENT=notifications@example.com|SMTP_TEST_RECIPIENT=$(/usr/sbin/mdata-get mail_adminaddr)|" \
+    -e "s|SMTP_TEST_RECIPIENT=notifications@example.com|SMTP_TEST_RECIPIENT=$(/usr/sbin/mdata-get mail_adminaddr 2>/dev/null)|" \
     -e "s|HELP_URL=https://docs.bigbluebutton.org/greenlight/gl-overview.html|HELP_URL=https://qutic.com/de/kontakt/|" \
     -e "s|DEFAULT_REGISTRATION=open|DEFAULT_REGISTRATION=invite|" \
     -e "s|ALLOW_GREENLIGHT_ACCOUNTS=true|ALLOW_GREENLIGHT_ACCOUNTS=true|" \
+    -e "s|OPENID_CONNECT_CLIENT_ID=|OPENID_CONNECT_CLIENT_ID=${BBB_OICD_CLIENT_ID}|" \
+    -e "s|OPENID_CONNECT_CLIENT_SECRET=|OPENID_CONNECT_CLIENT_SECRET=${BBB_OICD_CLIENT_SECRET}|" \
+    -e "s|OPENID_CONNECT_ISSUER=|OPENID_CONNECT_ISSUER=${BBB_OICD_ISSUER}|" \
+    -e "s|OAUTH2_REDIRECT=|OAUTH2_REDIRECT=${BBB_OICD_REDIRECT}|" \
     /root/greenlight/.env
   
   # ensure hostname for recordings
@@ -103,9 +120,9 @@ EOF
   echo "*** Create greenlight admin account"
   (
     cd /root/greenlight
-    NAME=$(/usr/sbin/mdata-get bbb_admin_name)
-    EMAIL2=$(/usr/sbin/mdata-get bbb_admin_email)
-    PWD=$(/usr/sbin/mdata-get bbb_admin_pwd)
+    NAME=$(/usr/sbin/mdata-get bbb_admin_name 2>/dev/null)
+    EMAIL2=$(/usr/sbin/mdata-get bbb_admin_email 2>/dev/null)
+    PWD=$(/usr/sbin/mdata-get bbb_admin_pwd 2>/dev/null)
     docker exec greenlight-v2 bundle exec rake user:create["${NAME}","${EMAIL2}","${PWD}","admin"]
     
     docker-compose pull
