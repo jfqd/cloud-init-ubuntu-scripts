@@ -210,7 +210,13 @@ $SUDO /usr/bin/cp /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xm
 # update the docker images
 $SUDO /usr/local/bin/uptodate-greenlight
 
+$SUDO sed -i \
+  -e \"s|proxy_pass http://91.229.246.61:5066;|proxy_pass https://91.229.246.61:7443;|" \
+  /usr/share/bigbluebutton/nginx/sip.nginx
+
 $SUDO /usr/bin/bbb-conf --restart
+
+$SUDO ufw delete allow OpenSSH
 EOF
 chmod +x /usr/local/bin/uptodate
 
