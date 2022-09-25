@@ -10,7 +10,8 @@ apt-get install -y \
   redis-server \
   postgresql \
   debconf-utils \
-  net-tools
+  net-tools \
+  jq
 
 echo "*** Setup database"
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys CB2DE8E5
@@ -48,18 +49,18 @@ cp /etc/onlyoffice/documentserver/local.json /etc/onlyoffice/documentserver/loca
 
 echo "*** Deactivate welcome page redirect"
 sed -i \
-    -e "s|rewrite ^/\$ \$the_scheme://\$the_host/welcome/ redirect;|rewrite ^/welcome(/)?\$ \$the_scheme://$the_host/ redirect;|" \
+    -e "s|rewrite ^/\$ \$the_scheme://\$the_host/welcome/ redirect;|rewrite ^/(welcome|example)(/)?\$ \$the_scheme://\$the_host/ redirect;|" \
     /etc/onlyoffice/documentserver/nginx/includes/ds-docservice.conf
 
 echo "*** Setup nginx https"
 cp /etc/onlyoffice/documentserver/nginx/ds-ssl.conf.tmpl  /etc/nginx/conf.d/ds-ssl.conf
-mkdir /etc/nginx/ssl
 
-sed -i -e "s#{{SSL_CERTIFICATE_PATH}}#/etc/nginx/ssl/nginx.crt#" /etc/nginx/conf.d/ds-ssl.conf
-sed -i -e "s#{{SSL_KEY_PATH}}#/etc/nginx/ssl/nginx.key#" /etc/nginx/conf.d/ds-ssl.conf
+FS_SECRET=$(jq ".storage.fs.secretString" /etc/onlyoffice/documentserver/local.json | sed -s "s|\"||g")
+sed -r -e "s|verysecretstring|${FS_SECRET}|g" /etc/nginx/conf.d/ds-ssl.conf
 
 # fallback
 (
+  mkdir /etc/nginx/ssl
   cd /etc/nginx/ssl
   CN=$(hostname)
   openssl req -newkey rsa:2048 -keyout nginx.key \
@@ -73,6 +74,9 @@ sed -i -e "s#{{SSL_KEY_PATH}}#/etc/nginx/ssl/nginx.key#" /etc/nginx/conf.d/ds-ss
   chmod 0600 nginx.key
   chmod 0600 nginx.pem
 )
+
+sed -i -e "s#{{SSL_CERTIFICATE_PATH}}#/etc/nginx/ssl/nginx.crt#" /etc/nginx/conf.d/ds-ssl.conf
+sed -i -e "s#{{SSL_KEY_PATH}}#/etc/nginx/ssl/nginx.key#" /etc/nginx/conf.d/ds-ssl.conf
 
 mv /etc/nginx/conf.d/ds.conf /etc/nginx/conf.d/ds.conf.bak
 systemctl restart nginx
@@ -101,9 +105,3 @@ EOF
 #   -e "s|access_log off;|access_log /var/log/onlyoffice/documentserver/nginx.access.log;|" \
 #   /etc/onlyoffice/documentserver/nginx/includes/ds-common.conf
 # tail /var/log/onlyoffice/documentserver/nginx.access.log
-# vim /etc/onlyoffice/documentserver/local.json
-# 
-# 'onlyoffice' => array (
-#   "jwt_secret" => "Jei4tiemee2peer3aeWeepah",
-#   "jwt_header" => "AuthorizationJwt"
-# ),
