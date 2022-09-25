@@ -9,9 +9,9 @@ cd $(dirname $(readlink -f $0))
 echo "*** Deactivate ipv6"
 ./deactivate-ipv6.bash
 
-echo "*** Setup uwf"
-./install-uwf-for-jitsi.bash
-./configure-uwf-for-zabbix.bash
+echo "*** Setup ufw"
+./install-ufw-for-jitsi.bash
+./configure-ufw-for-zabbix.bash
 
 echo "*** Install jitsi"
 ./install-jitsi-with-pwd.bash
