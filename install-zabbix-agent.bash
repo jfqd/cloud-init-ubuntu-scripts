@@ -7,9 +7,11 @@ if [[ $(grep -c "18.04" /etc/lsb-release) -ge 1 ]]; then
   rm zabbix-release_4.0-3+bionic_all.deb
 elif [[ $(grep -c "20.04" /etc/lsb-release) -ge 1 ]]; then
   echo "*** Install zabbix-agent on 20.04"
-  wget https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3+focal_all.deb
-  dpkg -i zabbix-release_4.0-3+focal_all.deb
+  wget wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.0-4%2Bubuntu20.04_all.deb
+  dpkg -i zabbix-release_6.0-4+ubuntu20.04_all.deb
   rm zabbix-release_4.0-3+focal_all.deb
+  apt-get update
+  apt-get -y install zabbix-agent
 else
   echo "*** ERROR: wrong ubuntu release, skip zabbix installation"
   exit 1
