@@ -26,7 +26,7 @@ DS_DB_USER=onlyoffice
 DS_DB_PWD=$(/usr/sbin/mdata-get psql_pwd)
 DS_JWT_ENABLED=false
 DS_JWT_SECRET="${DS_DB_PWD}"
-DS_JWT_HEADER="AuthorizationJwt"
+DS_JWT_HEADER="Authorization"
 
 echo onlyoffice-documentserver onlyoffice/ds-port select ${DS_PORT} | debconf-set-selections
 echo onlyoffice-documentserver onlyoffice/db-pwd password ${DS_DB_PWD} | debconf-set-selections
@@ -45,20 +45,30 @@ sudo -i -u postgres psql -c "GRANT ALL privileges ON DATABASE onlyoffice TO only
 
 echo "*** Install documentserver"
 apt-get -yq install onlyoffice-documentserver
+
+echo "*** Allow nextcloud to access onlyoffice"
+sed -i 
+   -e "s|\"inbox\": false|\"inbox\": true|" \
+   -e "s|\"outbox\": false|\"outbox\": true|" \
+   -e "s|\"browser\": false|\"browser\": true|" \
+   /etc/onlyoffice/documentserver/local.json
+
 cp /etc/onlyoffice/documentserver/local.json /etc/onlyoffice/documentserver/local.json.saved
 
-echo "*** Deactivate welcome page redirect"
+echo "*** Deactivate welcome and example page"
 sed -i \
     -e "s|rewrite ^/\$ \$the_scheme://\$the_host/welcome/ redirect;|rewrite ^/(welcome|example)(/)?\$ \$the_scheme://\$the_host/ redirect;|" \
     /etc/onlyoffice/documentserver/nginx/includes/ds-docservice.conf
 
 echo "*** Setup nginx https"
-cp /etc/onlyoffice/documentserver/nginx/ds-ssl.conf.tmpl  /etc/nginx/conf.d/ds-ssl.conf
+cp /etc/onlyoffice/documentserver/nginx/ds-ssl.conf.tmpl /etc/nginx/conf.d/ds-ssl.conf
 
 FS_SECRET=$(jq ".storage.fs.secretString" /etc/onlyoffice/documentserver/local.json | sed -s "s|\"||g")
-sed -r -e "s|verysecretstring|${FS_SECRET}|g" /etc/nginx/conf.d/ds-ssl.conf
+sed -i \
+    -e "s|verysecretstring|${FS_SECRET}|g" \
+    /etc/nginx/conf.d/ds-ssl.conf
 
-# fallback
+# create self sign cert, that nginx will start
 (
   mkdir /etc/nginx/ssl
   cd /etc/nginx/ssl
@@ -101,7 +111,7 @@ systemctl restart redis-server
 # tail -f /var/log/onlyoffice/documentserver/*.log
 EOF
 
+# echo "*** Activate access-log"
 # sed -i \
 #   -e "s|access_log off;|access_log /var/log/onlyoffice/documentserver/nginx.access.log;|" \
 #   /etc/onlyoffice/documentserver/nginx/includes/ds-common.conf
-# tail /var/log/onlyoffice/documentserver/nginx.access.log
