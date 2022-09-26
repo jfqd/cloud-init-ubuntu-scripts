@@ -89,6 +89,17 @@ sed -i -e "s#{{SSL_CERTIFICATE_PATH}}#/etc/nginx/ssl/nginx.crt#" /etc/nginx/conf
 sed -i -e "s#{{SSL_KEY_PATH}}#/etc/nginx/ssl/nginx.key#" /etc/nginx/conf.d/ds-ssl.conf
 
 mv /etc/nginx/conf.d/ds.conf /etc/nginx/conf.d/ds.conf.bak
+
+echo "*** Fix status logging"
+rm /etc/nginx/conf.d/status.conf
+cat >> /etc/nginx/includes/ds-common.conf << EOF
+location /nginx_status {
+  stub_status on;
+  access_log  off;
+  allow 127.0.0.1;
+  deny all;
+}
+EOF
 systemctl restart nginx
 
 echo "*** Restart documentserver"
