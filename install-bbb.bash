@@ -69,6 +69,9 @@ EOF
   cp /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml \
     /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml.bak
   
+  # Process kurento config too?
+  # /etc/kurento/modules/kurento/WebRtcEndpoint.conf.ini
+  
   else
     echo "*** No STUN- and TURN-server cause of missing configaration"
   fi
@@ -97,6 +100,11 @@ EOF
   else
     DEFAULT_REGISTRATION="invite"
   fi
+  
+  echo "*** Do not open port 22"
+  sed -i \
+    -e "s/  ufw allow OpenSSH/#  ufw allow OpenSSH/" \
+    /etc/bigbluebutton/bbb-conf/apply-lib.sh
 
   echo "*** Configure greenlight"
   sed -i \
@@ -216,7 +224,7 @@ $SUDO sed -i \
 
 $SUDO /usr/bin/bbb-conf --restart
 
-$SUDO ufw delete allow OpenSSH
+# $SUDO ufw delete allow OpenSSH
 EOF
 chmod +x /usr/local/bin/uptodate
 
