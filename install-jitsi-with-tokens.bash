@@ -36,12 +36,16 @@ sed -i "s|read EMAIL|EMAIL=${EMAIL}|" /usr/share/jitsi-meet/scripts/install-lets
 
 echo "jitsi-meet-tokens jitsi-meet-tokens/appid string ${APP_ID}" | debconf-set-selections
 echo "jitsi-meet-tokens jitsi-meet-tokens/appsecret string ${APP_SECRET}" | debconf-set-selections
-apt-get -y install gcc unzip libsasl2-dev lua5.2 liblua5.2 liblua5.2-dev luarocks libssl1.0-dev
+apt-get -y install gcc unzip libsasl2-dev lua5.2 liblua5.2 liblua5.2-dev luarocks libssl1.1 libssl-dev
+# libssl1.0-dev
 
 # install lua libs
 luarocks install luacrypto
 apt-get --option=Dpkg::Options::=--force-confold --option=Dpkg::options::=--force-unsafe-io --assume-yes --quiet install jitsi-meet-tokens
 luarocks remove --force lua-cjson
+
+# fix github clone of loarocks
+git config --global url."https://".insteadOf git://
 
 # fix lua-cjson
 (
