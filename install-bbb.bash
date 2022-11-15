@@ -239,6 +239,42 @@ docker-compose up -d
 EOF
 chmod +x /usr/local/bin/uptodate-greenlight
 
+cat >> /usr/local/bin/backup-greenlight-database << EOF
+#!/bin/bash
+cd /root/greenlight
+docker-compose exec db pg_dump \
+  --dbname=greenlight_production \
+  --username=postgres \
+  > psql-db-backup.sql
+EOF
+chmod +x /usr/local/bin/backup-greenlight-database
+
+cat >> /usr/local/bin/import-greenlight-database << EOF
+#!/bin/bash
+
+cd /root/greenlight/
+docker-compose stop app
+
+docker-compose exec db psql --username=postgres << DB
+DROP DATABASE greenlight_production;
+CREATE DATABASE greenlight_production;
+DB
+
+docker-compose exec db psql \
+  --dbname=greenlight_production \
+  --username=postgres \
+  < psql-db-backup.sql
+
+docker-compose exec rm /var/lib/postgresql/data/db.sql
+
+docker-compose start app
+EOF
+chmod +x /usr/local/bin/import-greenlight-database
+
+# cp db.sql /var/www/bigbluebutton-default/
+# curl -O https://${HOSTNAME}/db.sql
+# rm /var/www/bigbluebutton-default/db.sql 
+
 cat > /root/.bash_history << EOF
 tail -f /var/log/syslog
 vim /root/greenlight/.env
