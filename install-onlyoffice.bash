@@ -47,7 +47,7 @@ echo "*** Install documentserver"
 apt-get -yq install onlyoffice-documentserver
 
 echo "*** Allow nextcloud to access onlyoffice"
-sed -i 
+sed -i \
    -e "s|\"inbox\": false|\"inbox\": true|" \
    -e "s|\"outbox\": false|\"outbox\": true|" \
    -e "s|\"browser\": false|\"browser\": true|" \
