@@ -10,6 +10,6 @@ ufw allow in https
 ufw allow in 3478
 ufw allow in 5349
 ufw allow in 10000:20000/udp
-ufw active
+ufw enable
 yes | ufw --force enable
 yes | ufw --force enable
