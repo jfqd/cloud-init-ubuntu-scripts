@@ -15,8 +15,11 @@ if [[ $(grep -c "18.04" /etc/lsb-release) -ge 1 ]]; then
   echo "*** Install BBB 2.4 on 18.04"
   wget -qO- https://ubuntu.bigbluebutton.org/bbb-install.sh | bash -s -- -w -v bionic-24 -s ${HOSTNAME} -e ${EMAIL} -g
 elif [[ $(grep -c "20.04" /etc/lsb-release) -ge 1 ]]; then
-  echo "*** Install BBB 2.5 on 20.04"
-  wget -qO- https://ubuntu.bigbluebutton.org/bbb-install-2.5.sh | bash -s -- -w -v focal-250 -s ${HOSTNAME} -e ${EMAIL} -g
+  # echo "*** Install BBB 2.5 on 20.04"
+  # wget -qO- https://ubuntu.bigbluebutton.org/bbb-install-2.5.sh | bash -s -- -w -v focal-250 -s ${HOSTNAME} -e ${EMAIL} -g
+  echo "*** Install BBB 2.6 on 20.04"
+  wget -qO- https://ubuntu.bigbluebutton.org/bbb-install-2.6.sh | bash -s -- -w -v focal-260 -s ${HOSTNAME} -e ${EMAIL} -g
+
 else
   echo "*** ERROR: wrong ubuntu release, skip installation"
   exit 1
@@ -224,7 +227,10 @@ $SUDO sed -i \
 
 $SUDO /usr/bin/bbb-conf --restart
 
-# $SUDO ufw delete allow OpenSSH
+$SUDO ufw delete allow OpenSSH
+$SUDO ufw allow from 91.229.246.24/32 to any port 22 proto tcp
+$SUDO ufw allow from 91.229.246.25/32 to any port 22 proto tcp
+
 EOF
 chmod +x /usr/local/bin/uptodate
 
