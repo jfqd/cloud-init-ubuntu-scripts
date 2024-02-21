@@ -26,4 +26,4 @@ chmod +x install-fms.bash
 
 )
 
-# rm -rf /root/init
+rm -rf /root/init
