@@ -3,6 +3,9 @@
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get -y update
+
+apt remove shim-signed || true
+
 yes no | apt-get -y -qq upgrade
 yes no | apt-get -y -qq dist-upgrade
 
