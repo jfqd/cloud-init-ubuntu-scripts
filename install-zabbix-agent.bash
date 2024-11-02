@@ -19,6 +19,13 @@ elif [[ $(grep -c "22.04" /etc/lsb-release) -ge 1 ]]; then
   rm zabbix-release_6.0-4+ubuntu22.04_all.deb
   apt-get update
   apt-get -y install zabbix-agent
+elif [[ $(grep -c "24.04" /etc/lsb-release) -ge 1 ]]; then
+  echo "*** Install zabbix-agent on 22.04"
+  wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest+ubuntu24.04_all.deb
+  dpkg -i zabbix-release_latest+ubuntu24.04_all.deb
+  rm zabbix-release_latest+ubuntu24.04_all.deb
+  apt-get update
+  apt-get -y install zabbix-agent
 else
   echo "*** ERROR: wrong ubuntu release, skip zabbix installation"
   exit 1
