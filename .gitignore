@@ -1,3 +1,4 @@
 .DS_Store
 install-jitsi-with-tokens_docker.bash
 install-fms.bash
+install-rc.bash
