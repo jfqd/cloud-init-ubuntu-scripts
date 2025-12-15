@@ -11,8 +11,8 @@ cd "${folder}"
 echo "*** Run base install"
 ./base-install.bash
 
-echo "*** Configure locale"
-./configure-de-locale.bash
+# echo "*** Configure locale"
+# ./configure-de-locale.bash
 
 # echo "*** Increase disk size"
 # ./increase-disk.bash
