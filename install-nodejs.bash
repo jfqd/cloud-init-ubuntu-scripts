@@ -1,4 +1,4 @@
-#!/bin/bash
+!/usr/bin/bash
 
 NODE_JS_VERSION="14.21.3"
 

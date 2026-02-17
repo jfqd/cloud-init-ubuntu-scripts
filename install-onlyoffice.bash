@@ -107,7 +107,7 @@ supervisorctl restart all
 supervisorctl stop ds:example
 
 cat > /usr/local/bin/uptodate << EOF
-#!/bin/bash
+!/usr/bin/bash
 
 apt-get update
 apt-get -y upgrade
