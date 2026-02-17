@@ -13,7 +13,7 @@ apt-get install -y \
   net-tools \
   jq
 
-echo "*** Setup database"
+echo "*** Add onlyoffice repo"
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys CB2DE8E5
 echo "deb https://download.onlyoffice.com/repo/debian squeeze main" | tee /etc/apt/sources.list.d/onlyoffice.list
 apt-get update
