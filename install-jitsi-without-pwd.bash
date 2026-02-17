@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 sed -i "s/#DefaultLimitNOFILE=/DefaultLimitNOFILE=65000/" /etc/systemd/system.conf
 sed -i "s/#DefaultLimitNPROC=/DefaultLimitNPROC=65000/" /etc/systemd/system.conf

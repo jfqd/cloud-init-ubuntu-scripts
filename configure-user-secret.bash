@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 if [[ "$(id ubuntu 2>/dev/null; echo $?)" = "1" ]]; then
   addgroup ubuntu

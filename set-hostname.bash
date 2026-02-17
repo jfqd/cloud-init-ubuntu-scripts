@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 IP=$(ip address show dev net0 | grep 'inet ' | awk '{print $2}' | sed 's|/.*||')
 HOSTNAME=$(/usr/sbin/mdata-get sdc:hostname)

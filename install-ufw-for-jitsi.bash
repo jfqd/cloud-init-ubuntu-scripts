@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 apt-get -y -qq install ufw
 

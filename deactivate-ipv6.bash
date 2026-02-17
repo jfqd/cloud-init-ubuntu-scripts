@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 cat >> /etc/sysctl.conf << EOF
 
@@ -9,7 +9,7 @@ EOF
 sysctl -p
 
 cat >> /etc/rc.local << EOF
-#!/bin/bash
+#!/usr/bin/bash
 # /etc/rc.local
 
 /etc/sysctl.d

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # https://szewong.medium.com/rocket-chat-part-3-installing-jitsi-with-jwt-for-secure-video-conferencing-b6f909e7f92c
 # https://community.jitsi.org/t/solved-issue-in-connectivity-after-upgrade-the-jitsi-meet/17882/6
@@ -144,7 +144,7 @@ cat >> /etc/jitsi/jwt_payload << EOF
 EOF
 
 cat >> /usr/local/bin/app-restart << EOF
-#!/bin/bash
+#!/usr/bin/bash
 systemctl restart jicofo
 systemctl restart jitsi-videobridge2
 systemctl restart prosody

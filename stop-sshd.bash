@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 systemctl disable ssh
 systemctl stop ssh

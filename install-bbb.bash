@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Installs BBB with
 # -a  API Demo
@@ -201,7 +201,7 @@ chmod 0700 get_meetings.py
 
 echo "*** Configure scripts"
 cat > /usr/local/bin/uptodate << 'EOF'
-#!/bin/bash
+#!/usr/bin/bash
 
 if [[ $EUID -ne 0 ]]; then
   SUDO="sudo -E"
@@ -235,7 +235,7 @@ EOF
 chmod +x /usr/local/bin/uptodate
 
 cat > /usr/local/bin/uptodate-greenlight << EOF
-#!/bin/bash
+#!/usr/bin/bash
 
 # update the docker images
 cd /root/greenlight
@@ -246,7 +246,7 @@ EOF
 chmod +x /usr/local/bin/uptodate-greenlight
 
 cat >> /usr/local/bin/backup-greenlight-database << EOF
-#!/bin/bash
+#!/usr/bin/bash
 cd /root/greenlight
 docker-compose exec db pg_dump \
   --dbname=greenlight_production \
@@ -256,7 +256,7 @@ EOF
 chmod +x /usr/local/bin/backup-greenlight-database
 
 cat >> /usr/local/bin/import-greenlight-database << EOF
-#!/bin/bash
+#!/usr/bin/bash
 
 cd /root/greenlight/
 docker-compose stop app

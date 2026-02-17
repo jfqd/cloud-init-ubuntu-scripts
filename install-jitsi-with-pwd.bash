@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 HOSTNAME=$(/usr/sbin/mdata-get sdc:hostname)
 
@@ -90,7 +90,7 @@ EOF
 systemctl restart zabbix-agent
 
 cat >> /usr/local/bin/register << 'EOF'
-#!/bin/bash
+#!/usr/bin/bash
 
 prosodyctl register $1 $(hostname) $2
 EOF

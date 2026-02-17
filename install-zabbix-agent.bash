@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 if [[ $(grep -c "18.04" /etc/lsb-release) -ge 1 ]]; then
   echo "*** Install zabbix-agent on 18.04"

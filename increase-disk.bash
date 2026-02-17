@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 swapoff -a || true
 sed -i -e "s|/dev/vda2|#/dev/vda2|" /etc/fstab
