@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+PATH=/usr/sbin:/usr/bin
+
 echo "*** Install requirements"
 apt-get install -y \
   dnsutils \
@@ -23,10 +25,13 @@ DS_PORT=80
 DS_DB_HOST=localhost
 DS_DB_NAME=onlyoffice
 DS_DB_USER=onlyoffice
-DS_DB_PWD=$(/usr/sbin/mdata-get psql_pwd)
+DS_DB_PWD=$(LC_ALL=C tr -cd '[:alnum:]_!]:,)' < /dev/urandom | head -c32)
 DS_JWT_ENABLED=false
-DS_JWT_SECRET="${DS_DB_PWD}"
+DS_JWT_SECRET=$(/usr/sbin/mdata-get jwt_secret)
 DS_JWT_HEADER="Authorization"
+
+# ensure we know the db password
+/usr/sbin/mdata-put psql_pwd "${DS_DB_PWD}"
 
 echo onlyoffice-documentserver onlyoffice/ds-port select ${DS_PORT} | debconf-set-selections
 echo onlyoffice-documentserver onlyoffice/db-pwd password ${DS_DB_PWD} | debconf-set-selections
