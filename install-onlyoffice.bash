@@ -29,6 +29,7 @@ DS_DB_PWD=$(LC_ALL=C tr -cd '[:alnum:]_!]:,)' < /dev/urandom | head -c32)
 DS_JWT_ENABLED=false
 DS_JWT_SECRET=$(/usr/sbin/mdata-get jwt_secret)
 DS_JWT_HEADER="Authorization"
+PG_VERSION=16
 
 # ensure we know the db password
 /usr/sbin/mdata-put psql_pwd "${DS_DB_PWD}"
@@ -36,14 +37,22 @@ DS_JWT_HEADER="Authorization"
 echo onlyoffice-documentserver onlyoffice/ds-port select ${DS_PORT} | debconf-set-selections
 echo onlyoffice-documentserver onlyoffice/db-pwd password ${DS_DB_PWD} | debconf-set-selections
 echo onlyoffice-documentserver onlyoffice/db-host string ${DS_DB_HOST} | debconf-set-selections
-echo onlyoffice-documentserver onlyoffice/db-user string $DS_DB_USER | debconf-set-selections
-echo onlyoffice-documentserver onlyoffice/db-name string $DS_DB_NAME | debconf-set-selections
+echo onlyoffice-documentserver onlyoffice/db-user string ${DS_DB_USER} | debconf-set-selections
+echo onlyoffice-documentserver onlyoffice/db-name string ${DS_DB_NAME} | debconf-set-selections
 echo onlyoffice-documentserver onlyoffice/jwt-enabled select ${DS_JWT_ENABLED} | debconf-set-selections
 echo onlyoffice-documentserver onlyoffice/jwt-secret select ${DS_JWT_SECRET} | debconf-set-selections
 echo onlyoffice-documentserver onlyoffice/jwt-header select ${DS_JWT_HEADER} | debconf-set-selections
 echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 
-echo "*** Setup database"
+echo "*** Setup postgresql"
+cat >> /etc/postgresql/${PG_VERSION}/main/pg_hba.conf << EOF
+local   all             onlyoffice                               password
+host    all             onlyoffice       127.0.0.1/32            password
+host    all             onlyoffice       ::1/128                 password
+EOF
+systemctl restart postgresql
+systemctl status postgresql
+
 sudo -i -u postgres psql -c "CREATE DATABASE onlyoffice;"
 sudo -i -u postgres psql -c "CREATE USER onlyoffice WITH password '${DS_DB_PWD}';"
 sudo -i -u postgres psql -c "GRANT ALL privileges ON DATABASE onlyoffice TO onlyoffice;"
@@ -126,6 +135,9 @@ systemctl restart redis-server
 
 # tail -f /var/log/onlyoffice/documentserver/*.log
 EOF
+
+# if the jwt is not configured, the install process will generate a jwt, we can access ist with:
+# /usr/bin/documentserver-jwt-status.sh | grep secret | sed 's/JWT secret  -  //')
 
 # echo "*** Activate access-log"
 # sed -i \
