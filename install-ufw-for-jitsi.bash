@@ -4,7 +4,7 @@ apt-get -y -qq install ufw
 
 ufw deny incoming
 ufw allow outgoing
-ufw allow in ssh
+ufw limit 22/tcp
 ufw allow in http
 ufw allow in https
 ufw allow in 3478
