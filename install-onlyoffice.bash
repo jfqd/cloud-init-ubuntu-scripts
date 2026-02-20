@@ -26,10 +26,10 @@ DS_DB_HOST=localhost
 DS_DB_NAME=onlyoffice
 DS_DB_USER=onlyoffice
 DS_DB_PWD=$(LC_ALL=C tr -cd '[:alnum:]_!]:,)' < /dev/urandom | head -c32)
-DS_JWT_ENABLED=false
+DS_JWT_ENABLED=true
 DS_JWT_SECRET=$(/usr/sbin/mdata-get jwt_secret)
 DS_JWT_HEADER="Authorization"
-PG_VERSION=16
+PG_VERSION=$(/usr/bin/ls /etc/postgresql/ | tr -cd '[:alnum:]')
 
 # ensure we know the db password
 /usr/sbin/mdata-put psql_pwd "${DS_DB_PWD}"
@@ -42,13 +42,14 @@ echo onlyoffice-documentserver onlyoffice/db-name string ${DS_DB_NAME} | debconf
 echo onlyoffice-documentserver onlyoffice/jwt-enabled select ${DS_JWT_ENABLED} | debconf-set-selections
 echo onlyoffice-documentserver onlyoffice/jwt-secret select ${DS_JWT_SECRET} | debconf-set-selections
 echo onlyoffice-documentserver onlyoffice/jwt-header select ${DS_JWT_HEADER} | debconf-set-selections
+echo onlyoffice-documentserver onlyoffice/accepted-onlyoffice-license select true | debconf-set-selections
 echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 
 echo "*** Setup postgresql"
 cat >> /etc/postgresql/${PG_VERSION}/main/pg_hba.conf << EOF
-local   all             onlyoffice                               password
-host    all             onlyoffice       127.0.0.1/32            password
-host    all             onlyoffice       ::1/128                 password
+local   all             onlyoffice                               md5
+host    all             onlyoffice       127.0.0.1/32            md5
+host    all             onlyoffice       ::1/128                 md5
 EOF
 systemctl restart postgresql
 systemctl status postgresql
