@@ -23,3 +23,6 @@ echo "*** Install exim"
 
 echo "*** Install zabbix"
 ./install-zabbix-agent.bash
+
+echo "*** Harden sshd config"
+./harden_sshd.bash
