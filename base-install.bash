@@ -15,6 +15,7 @@ echo "*** Update ubuntu user"
 ./configure-user-secret.bash
 
 echo "*** Get latest upgrades"
+./fix-shim-config.bash
 ./apt-upgrade.bash
 
 echo "*** Install exim"
