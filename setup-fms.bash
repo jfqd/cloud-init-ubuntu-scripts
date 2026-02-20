@@ -22,6 +22,6 @@ URL="$(/usr/sbin/mdata-get fms_install_script_url)"
 curl -q "${URL}" > install-fms.bash
 chmod +x install-fms.bash
 /usr/sbin/mdata-delete fms_install_script_url || true
-# ./install-fms.bash
+./install-fms.bash
 
 )
