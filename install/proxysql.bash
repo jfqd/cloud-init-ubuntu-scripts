@@ -55,6 +55,19 @@ prompt = 'Admin> '
 EOF
 fi
 
+cat > /usr/local/bin/create_user << 'EOF'
+#!/bin/bash
+
+db_user=$1
+password=$2
+
+mysql --defaults-file=/root/.my.cnf -e "INSERT INTO mysql_users(username,password,default_hostgroup) VALUES ('${db_user}','${password}',0);"
+mysql --defaults-file=/root/.my.cnf -e "LOAD MYSQL USERS TO RUNTIME;"
+mysql --defaults-file=/root/.my.cnf -e "SAVE MYSQL USERS FROM RUNTIME;"
+mysql --defaults-file=/root/.my.cnf -e "SAVE MYSQL USERS TO DISK;"
+EOF
+chmod +x /usr/local/bin/create_user
+
 echo "*** Install failover script"
 cat > /usr/local/bin/failover << 'EOF'
 #!/bin/bash
