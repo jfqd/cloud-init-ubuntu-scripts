@@ -6,7 +6,14 @@ apt-get update
 apt-get -y upgrade
 apt-get -y dist-upgrade
 
-apt-get -y install lsb-release libipset3 libipset-dev default-mysql-client screen apt-transport-https keepalived python3-pip python3-mysqldb
+apt-get -y install apt-transport-https
+apt-get -y install lsb-release
+apt-get -y install libipset13
+apt-get -y install libipset-dev
+apt-get -y install mysql-client
+apt-get -y install keepalived
+apt-get -y install python3-pip
+apt-get -y install python3-mysqldb
 
 wget -O - 'https://repo.proxysql.com/ProxySQL/proxysql-3.x/repo_pub_key' | apt-key add -
 echo deb https://repo.proxysql.com/ProxySQL/proxysql-3.x/ubuntu jammy main | tee /etc/apt/sources.list.d/proxysql.list
@@ -14,13 +21,14 @@ echo deb https://repo.proxysql.com/ProxySQL/proxysql-3.x/ubuntu jammy main | tee
 apt-get update
 apt-get -y install proxysql
 
-mv /etc/proxysql.cnf /etc/proxysql.cnf.bak
+if [[ -f /etc/proxysql.cnf ]]; then
+  mv /etc/proxysql.cnf /etc/proxysql.cnf.bak
+fi
 
 echo "*** Install proxysql config"
 URL="$(/usr/sbin/mdata-get proxysql_config_url)"
 /usr/sbin/mdata-delete proxysql_config_url || true
 
-mv /etc/proxysql.cnf /etc/proxysql.cnf.bak || true
 curl -q "${URL}" > /etc/proxysql.cnf
 chmod 0640 /etc/proxysql.cnf
 chown root:proxysql /etc/proxysql.cnf
@@ -53,7 +61,10 @@ KA_STATE="$(/usr/sbin/mdata-get keepalive_state)"
 KA_PWD="$(/usr/sbin/mdata-get keepalive_password)"
 KA_EMAIL="$(/usr/sbin/mdata-get mail_adminaddr)"
 
-mv /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.bak || true
+mkdir -p /etc/keepalived
+if [[ -f /etc/keepalived/keepalived.conf ]]; then
+  mv /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.bak
+fi
 
 cat > /etc/keepalived/keepalived.conf << EOF
 global_defs {
@@ -92,21 +103,11 @@ vrrp_instance VI_00${KA_VINST} {
 }
 EOF
 chmod 0640 /etc/keepalived/keepalived.conf
-service keepalived start
+systemctl start keepalived
 
 cat > /usr/local/bin/zabbix_proxysql << 'EOF'
 #!/usr/bin/python3
 # -*- coding: utf-8
-#
-# Zabbix-template for monitoring ProxySQL
-# Konstantin A Zhuravlev aka ZhuKoV <zhukov@zhukov.int.ru> 2018
-#
-# Requirements:
-# pip3.7 install mysqlclient
-# 
-# Usage: $0 discovery <servers|hostgroups>
-#	$0 get <server|hostgroup|proxysql> [object_id]
-
 ############################################################
 
 proxysql_host     = "127.0.0.1"
@@ -256,5 +257,4 @@ EOF
 chmod 0750 /usr/local/bin/zabbix_proxysql
 chown root:zabbix /usr/local/bin/zabbix_proxysql
 
-pip3 install mysqlclient
-systemctr restart zabbix-agent
+systemctl restart zabbix-agent
