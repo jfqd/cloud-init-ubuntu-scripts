@@ -6,6 +6,7 @@ if /usr/sbin/mdata-get ubuntu_user_secret 1>/dev/null 2>&1; then
   /usr/sbin/usermod --password "\$6\$${SECRET}" root
 fi
 
+echo "*** Install requirements"
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
@@ -16,6 +17,7 @@ apt-get install -y --no-install-recommends lsb-release wget apt-transport-https 
 
 apt-get install -y libipset13 libipset-dev mysql-client keepalived python3-pip python3-mysqldb
 
+echo "*** Install proxysql"
 wget -nv -O /etc/apt/trusted.gpg.d/proxysql-3.0.x-keyring.gpg 'https://repo.proxysql.com/ProxySQL/proxysql-3.0.x/repo_pub_key.gpg'
 echo "deb https://repo.proxysql.com/ProxySQL/proxysql-3.0.x/$(lsb_release -sc)/ ./" | tee /etc/apt/sources.list.d/proxysql.list
 
@@ -38,6 +40,7 @@ ln -nfs /var/lib/proxysql/proxysql.log /var/log/proxysql_log
 
 service proxysql start
 
+echo "*** Install failover script"
 cat > /usr/local/bin/failover << 'EOF'
 #!/bin/bash
 SERVICE='proxysql'
@@ -52,6 +55,7 @@ fi
 EOF
 chmod +x /usr/local/bin/failover
 
+echo "*** Configure keepalived"
 HOSTNAME=$(hostname)
 
 KA_IP="$(/usr/sbin/mdata-get keepalive_vip)"
@@ -106,6 +110,7 @@ EOF
 chmod 0640 /etc/keepalived/keepalived.conf
 systemctl start keepalived
 
+echo "*** Install zabbix keepalived monitoring"
 cat > /usr/local/bin/zabbix_proxysql << 'EOF'
 #!/usr/bin/python3
 # -*- coding: utf-8
@@ -257,5 +262,10 @@ elif sys.argv[1] == 'get':
 EOF
 chmod 0750 /usr/local/bin/zabbix_proxysql
 chown root:zabbix /usr/local/bin/zabbix_proxysql
+
+cat > /etc/zabbix/zabbix_agentd.conf.d/proxysql.conf << 'EOF'
+UserParameter=proxysql_discovery[*],/usr/local/bin/zabbix_proxysql discovery $1
+UserParameter=proxysql[*],/usr/local/bin/zabbix_proxysql get $1 $2 $3
+EOF
 
 systemctl restart zabbix-agent
