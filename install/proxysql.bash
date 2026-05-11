@@ -12,17 +12,12 @@ apt-get update
 apt-get -y upgrade
 apt-get -y dist-upgrade
 
-apt-get -y install apt-transport-https
-apt-get -y install lsb-release
-apt-get -y install libipset13
-apt-get -y install libipset-dev
-apt-get -y install mysql-client
-apt-get -y install keepalived
-apt-get -y install python3-pip
-apt-get -y install python3-mysqldb
+apt-get install -y --no-install-recommends lsb-release wget apt-transport-https ca-certificates
 
-wget -O - 'https://repo.proxysql.com/ProxySQL/proxysql-3.x/repo_pub_key' | apt-key add -
-echo deb https://repo.proxysql.com/ProxySQL/proxysql-3.x/ubuntu jammy main | tee /etc/apt/sources.list.d/proxysql.list
+apt-get install -y libipset13 libipset-dev mysql-client keepalived python3-pip python3-mysqldb
+
+wget -nv -O /etc/apt/trusted.gpg.d/proxysql-3.0.x-keyring.gpg 'https://repo.proxysql.com/ProxySQL/proxysql-3.0.x/repo_pub_key.gpg'
+echo "deb https://repo.proxysql.com/ProxySQL/proxysql-3.0.x/$(lsb_release -sc)/ ./" | tee /etc/apt/sources.list.d/proxysql.list
 
 apt-get update
 apt-get -y install proxysql
@@ -91,7 +86,7 @@ vrrp_script check_proxy {
 vrrp_instance VI_00${KA_VINST} {
   state ${KA_STATE}
   interface net0
-  virtual_router_id ${KA_ID}
+  virtual_router_id ${KA_RID}
   priority ${KA_PRIO}
   garp_master_delay 2
   advert_int 1
