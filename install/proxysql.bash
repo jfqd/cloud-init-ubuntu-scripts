@@ -29,16 +29,31 @@ if [[ -f /etc/proxysql.cnf ]]; then
 fi
 
 echo "*** Install proxysql config"
-URL="$(/usr/sbin/mdata-get proxysql_config_url)"
-/usr/sbin/mdata-delete proxysql_config_url || true
+if /usr/sbin/mdata-get proxysql_config_url 1>/dev/null 2>&1; then
+  URL="$(/usr/sbin/mdata-get proxysql_config_url)"
+  /usr/sbin/mdata-delete proxysql_config_url || true
 
-curl -q "${URL}" > /etc/proxysql.cnf
-chmod 0640 /etc/proxysql.cnf
-chown root:proxysql /etc/proxysql.cnf
+  curl -q "${URL}" > /etc/proxysql.cnf
+  chmod 0640 /etc/proxysql.cnf
+  chown root:proxysql /etc/proxysql.cnf
+fi
 
 ln -nfs /var/lib/proxysql/proxysql.log /var/log/proxysql_log
 
 service proxysql start
+
+if /usr/sbin/mdata-get proxysql_admin_pwd 1>/dev/null 2>&1; then
+  ADM_PWD="$(/usr/sbin/mdata-get proxysql_admin_pwd)"
+  /usr/sbin/mdata-delete proxysql_admin_pwd || true
+  cat > /root/.my.cnf << EOF
+[client]
+host = 127.0.0.1
+port = 3307
+user = admin
+password = ${ADM_PWD}
+prompt = 'Admin> '
+EOF
+fi
 
 echo "*** Install failover script"
 cat > /usr/local/bin/failover << 'EOF'
