@@ -20,7 +20,7 @@ elif [[ $(grep -c "22.04" /etc/lsb-release) -ge 1 ]]; then
   apt-get update
   apt-get -y install zabbix-agent
 elif [[ $(grep -c "24.04" /etc/lsb-release) -ge 1 ]]; then
-  echo "*** Install zabbix-agent on 22.04"
+  echo "*** Install zabbix-agent on 24.04"
   wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest+ubuntu24.04_all.deb
   dpkg -i zabbix-release_latest+ubuntu24.04_all.deb
   rm zabbix-release_latest+ubuntu24.04_all.deb
