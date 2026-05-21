@@ -136,6 +136,7 @@ systemctl restart redis-server
 
 # tail -f /var/log/onlyoffice/documentserver/*.log
 EOF
+chmod +x /usr/local/bin/uptodate
 
 # if the jwt is not configured, the install process will generate a jwt, we can access ist with:
 # /usr/bin/documentserver-jwt-status.sh | grep secret | sed 's/JWT secret  -  //')

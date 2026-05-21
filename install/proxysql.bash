@@ -296,4 +296,16 @@ UserParameter=proxysql_discovery[*],/usr/local/bin/zabbix_proxysql discovery $1
 UserParameter=proxysql[*],/usr/local/bin/zabbix_proxysql get $1 $2 $3
 EOF
 
+echo "*** Configure uptodate"
+cat > /usr/local/bin/uptodate << 'EOF'
+#!/usr/bin/bash
+
+export DEBIAN_FRONTEND=noninteractive
+/usr/bin/apt-get update
+/usr/bin/apt-get -y -o Dpkg::Options::="--force-confold" upgrade
+/usr/bin/apt-get -y -o Dpkg::Options::="--force-confold" dist-upgrade
+/usr/bin/apt-get -y autoremove
+EOF
+chmod +x /usr/local/bin/uptodate
+
 systemctl restart zabbix-agent
