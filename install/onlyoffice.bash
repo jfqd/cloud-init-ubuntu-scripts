@@ -70,10 +70,10 @@ sed -i \
 
 cp /etc/onlyoffice/documentserver/local.json /etc/onlyoffice/documentserver/local.json.saved
 
-echo "*** Deactivate welcome and example page"
-sed -i \
-    -e "s|rewrite ^/\$ \$the_scheme://\$the_host/welcome/ redirect;|rewrite ^/(welcome|example)(/)?\$ \$the_scheme://\$the_host/ redirect;|" \
-    /etc/onlyoffice/documentserver/nginx/includes/ds-docservice.conf
+# echo "*** Deactivate welcome and example page"
+# sed -i \
+#     -e "s|rewrite ^/\$ \$the_scheme://\$the_host/welcome/ redirect;|rewrite ^/(welcome|example)(/)?\$ \$the_scheme://\$the_host/ redirect;|" \
+#     /etc/onlyoffice/documentserver/nginx/includes/ds-docservice.conf
 
 echo "*** Setup nginx https"
 cp /etc/onlyoffice/documentserver/nginx/ds-ssl.conf.tmpl /etc/nginx/conf.d/ds-ssl.conf
