@@ -14,7 +14,7 @@ echo "*** Run base install"
 echo "*** Install nginx"
 ./install/nginx.bash
 
-echo "*** Install bbb"
-./install-onlyoffice.bash
+echo "*** Install onlyoffice"
+./install/onlyoffice.bash
 
 )
