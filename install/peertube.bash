@@ -20,9 +20,7 @@ echo "deb [signed-by=/usr/share/keyrings/postgresql.asc] http://apt.postgresql.o
 
 echo "* Install requirements"
 apt-get update
-apt-get install -y \
-  postgresql postgresql-contrib \
-  yarn
+apt-get install -y postgresql postgresql-contrib
 
 echo "* Setup postgresql"
 sed -i 's/local   all             all                                     password/local   all             all                                     peer/' \
